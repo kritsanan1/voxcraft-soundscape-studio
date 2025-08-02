@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { Dot } from "lucide-react"
@@ -59,8 +61,12 @@ InputOTPSlot.displayName = "InputOTPSlot"
 const InputOTPSeparator = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div">
->(({ ...props }, ref) => (
-  <div ref={ref} role="separator" {...props}>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("-mx-2 flex items-center justify-center", className)}
+    {...props}
+  >
     <Dot />
   </div>
 ))

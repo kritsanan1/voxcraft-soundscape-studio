@@ -25,8 +25,7 @@ const Navigation = () => {
   return (
     <nav className="fixed top-0 w-full z-50 bg-glass-bg backdrop-blur-md border-b border-glass-border">
       <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          
+        
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">

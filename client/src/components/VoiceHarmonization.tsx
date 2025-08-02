@@ -23,9 +23,9 @@ const VoiceHarmonization = () => {
     { id: "1", voice_id: "Aria", pitch_offset: 0.3, volume: 0.7, delay: 0, enabled: true },
     { id: "2", voice_id: "Roger", pitch_offset: -0.2, volume: 0.6, delay: 0.1, enabled: true },
   ]);
-  const [masterVolume, setMasterVolume] = useState([0.8]);
-  const [harmonySpread, setHarmonySpread] = useState([0.5]);
-  const [reverbAmount, setReverbAmount] = useState([0.3]);
+  const [masterVolume, setMasterVolume] = useState<number[]>([0.8]);
+  const [harmonySpread, setHarmonySpread] = useState<number[]>([0.5]);
+  const [reverbAmount, setReverbAmount] = useState<number[]>([0.3]);
   
   const { toast } = useToast();
 
@@ -66,11 +66,11 @@ const VoiceHarmonization = () => {
   };
 
   const removeHarmonyVoice = (id: string) => {
-    setHarmonyVoices(harmonyVoices.filter(voice => voice.id !== id));
+    setHarmonyVoices(harmonyVoices.filter((voice: HarmonyVoice) => voice.id !== id));
   };
 
   const updateHarmonyVoice = (id: string, updates: Partial<HarmonyVoice>) => {
-    setHarmonyVoices(harmonyVoices.map(voice => 
+    setHarmonyVoices(harmonyVoices.map((voice: HarmonyVoice) => 
       voice.id === id ? { ...voice, ...updates } : voice
     ));
   };
@@ -231,7 +231,7 @@ const VoiceHarmonization = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {harmonyVoices.map((voice, index) => (
+                {harmonyVoices.map((voice: HarmonyVoice, index: number) => (
                   <div key={voice.id} className="p-4 bg-muted/10 rounded-lg space-y-3">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">Voice {index + 1}</h4>
@@ -268,7 +268,7 @@ const VoiceHarmonization = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableVoices.map((voiceName) => (
+                          {availableVoices.map((voiceName: string) => (
                             <SelectItem key={voiceName} value={voiceName}>
                               {voiceName}
                             </SelectItem>
@@ -287,7 +287,7 @@ const VoiceHarmonization = () => {
                       </div>
                       <Slider
                         value={[voice.pitch_offset]}
-                        onValueChange={([value]) => updateHarmonyVoice(voice.id, { pitch_offset: value })}
+                        onValueChange={([value]: number[]) => updateHarmonyVoice(voice.id, { pitch_offset: value })}
                         min={-1}
                         max={1}
                         step={0.05}
@@ -303,7 +303,7 @@ const VoiceHarmonization = () => {
                       </div>
                       <Slider
                         value={[voice.volume]}
-                        onValueChange={([value]) => updateHarmonyVoice(voice.id, { volume: value })}
+                        onValueChange={([value]: number[]) => updateHarmonyVoice(voice.id, { volume: value })}
                         min={0}
                         max={1}
                         step={0.05}
@@ -319,7 +319,7 @@ const VoiceHarmonization = () => {
                       </div>
                       <Slider
                         value={[voice.delay]}
-                        onValueChange={([value]) => updateHarmonyVoice(voice.id, { delay: value })}
+                        onValueChange={([value]: number[]) => updateHarmonyVoice(voice.id, { delay: value })}
                         min={0}
                         max={0.5}
                         step={0.01}

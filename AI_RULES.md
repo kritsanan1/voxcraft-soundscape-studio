@@ -35,3 +35,18 @@ To maintain a clean and efficient codebase, please follow these specific guideli
 *   **New Components/Hooks**: Always create new files for new components or hooks, even if they are small. Do not add new components to existing files.
 *   **Error Handling**: Implement `ErrorBoundary` components for graceful error handling in the UI. Avoid `try/catch` blocks for React component rendering errors, allowing them to bubble up to the error boundary.
 *   **Supabase**: If authentication or real-time database features are required, use the provided Supabase client integration.
+
+## Directory Structure
+
+*   **Client-side directories**: All client-side directories (e.g., `src/pages`, `src/components`, `src/hooks`) MUST be all lower-case.
+*   **File Naming**: File names may use mixed-case (e.g., `MyComponent.tsx`, `useMyHook.ts`).
+*   **Logical Grouping**: Organize files into logical, small, and focused directories (e.g., `components`, `pages`, `hooks`, `utils`).
+
+## Coding Guidelines
+
+*   **Responsive Design**: ALWAYS generate responsive designs using Tailwind CSS.
+*   **Toast Notifications**: Use toast components (from `shadcn/ui` and `react-hot-toast` if integrated) to inform the user about important events, such as success messages, errors, or loading states.
+*   **Error Handling Philosophy**: Do not catch errors with `try/catch` blocks within React components unless specifically requested by the user for a particular logic flow. It's important that errors are thrown so they can bubble up to the `ErrorBoundary` for centralized handling and reporting.
+*   **Simplicity and Elegance**: Prioritize simple and elegant solutions. Avoid over-engineering with complex error handling, fallback mechanisms, or unnecessary abstractions unless explicitly required. Focus on the user's request and make the minimum amount of changes needed.
+*   **Completeness**: All implemented features must be fully functional with complete code. Avoid placeholders, partial implementations, or `TODO` comments.
+*   **Component Size**: Aim for components that are 100 lines of code or less. Be ready to refactor larger files into smaller, more focused components or hooks.

@@ -76,7 +76,7 @@ const Hero = () => {
                 {/* Waveform Visualization */}
                 <div className="h-32 bg-muted/30 rounded-lg p-4 relative overflow-hidden">
                   <div className="flex items-end justify-center h-full gap-1">
-                    {[...Array(40)].map((_, i) => (
+                    {Array.from({ length: 40 }).map((_, i) => (
                       <div
                         key={i}
                         className="bg-primary rounded-full animate-visualizer"

@@ -119,14 +119,14 @@ const SmartContentGenerator = () => {
         throw new Error(response.error.message);
       }
 
-      setGeneratedContent(response.data);
+      setGeneratedContent(response.data as GeneratedContent);
 
       toast({
         title: "Content Generated",
         description: "Your AI-generated content is ready!",
       });
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Content generation error:', error);
       toast({
         title: "Generation Failed",
@@ -227,7 +227,7 @@ const SmartContentGenerator = () => {
                   <Input
                     placeholder="Enter your content topic..."
                     value={topic}
-                    onChange={(e) => setTopic(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTopic(e.target.value)}
                     className="bg-muted/30 border-border/50"
                   />
                 </div>
@@ -418,7 +418,7 @@ const SmartContentGenerator = () => {
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium">Recommended Voices</h4>
                         <div className="flex flex-wrap gap-2">
-                          {generatedContent.metadata.recommended_voices.map((voice) => (
+                          {generatedContent.metadata.recommended_voices.map((voice: string) => (
                             <Badge key={voice} variant="secondary">
                               {voice}
                             </Badge>
@@ -432,7 +432,7 @@ const SmartContentGenerator = () => {
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium">Voice Acting Tips</h4>
                         <ul className="text-sm text-muted-foreground space-y-1">
-                          {generatedContent.tips.map((tip, index) => (
+                          {generatedContent.tips.map((tip: string, index: number) => (
                             <li key={index} className="flex items-start gap-2">
                               <span className="text-primary mt-1">•</span>
                               {tip}

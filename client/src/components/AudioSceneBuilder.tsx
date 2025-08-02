@@ -55,7 +55,7 @@ const AudioSceneBuilder = () => {
       enabled: true
     }
   ]);
-  const [masterVolume, setMasterVolume] = useState([0.7]);
+  const [masterVolume, setMasterVolume] = useState<number[]>([0.7]);
   const [sceneDescription, setSceneDescription] = useState("A peaceful forest clearing with gentle wind and distant birds");
   
   const { toast } = useToast();
@@ -69,7 +69,7 @@ const AudioSceneBuilder = () => {
     { value: "rain", label: "Rain", icon: Zap }
   ];
 
-  const ambientSoundTypes = {
+  const ambientSoundTypes: Record<string, string[]> = {
     nature: ["forest", "birds", "wind", "stream", "crickets", "owl"],
     urban: ["traffic", "subway", "crowd", "construction", "sirens", "footsteps"],
     ocean: ["waves", "seagulls", "whale", "underwater", "storm", "calm"],
@@ -88,7 +88,7 @@ const AudioSceneBuilder = () => {
   ];
 
   const addAmbientSound = () => {
-    const currentSounds = ambientSoundTypes[sceneType as keyof typeof ambientSoundTypes] || [];
+    const currentSounds = ambientSoundTypes[sceneType] || [];
     if (currentSounds.length === 0) return;
 
     const newSound: AmbientSound = {
@@ -110,11 +110,11 @@ const AudioSceneBuilder = () => {
   };
 
   const removeAmbientSound = (id: string) => {
-    setAmbientSounds(ambientSounds.filter(sound => sound.id !== id));
+    setAmbientSounds(ambientSounds.filter((sound: AmbientSound) => sound.id !== id));
   };
 
   const updateAmbientSound = (id: string, updates: Partial<AmbientSound>) => {
-    setAmbientSounds(ambientSounds.map(sound => 
+    setAmbientSounds(ambientSounds.map((sound: AmbientSound) => 
       sound.id === id ? { ...sound, ...updates } : sound
     ));
   };
@@ -132,11 +132,11 @@ const AudioSceneBuilder = () => {
   };
 
   const removeEnvironmentEffect = (id: string) => {
-    setEnvironmentEffects(environmentEffects.filter(effect => effect.id !== id));
+    setEnvironmentEffects(environmentEffects.filter((effect: EnvironmentEffect) => effect.id !== id));
   };
 
   const updateEnvironmentEffect = (id: string, updates: Partial<EnvironmentEffect>) => {
-    setEnvironmentEffects(environmentEffects.map(effect => 
+    setEnvironmentEffects(environmentEffects.map((effect: EnvironmentEffect) => 
       effect.id === id ? { ...effect, ...updates } : effect
     ));
   };
@@ -199,7 +199,7 @@ const AudioSceneBuilder = () => {
     });
   };
 
-  const currentSoundTypes = ambientSoundTypes[sceneType as keyof typeof ambientSoundTypes] || [];
+  const currentSoundTypes = ambientSoundTypes[sceneType] || [];
 
   return (
     <section className="py-20 px-6">
@@ -320,7 +320,7 @@ const AudioSceneBuilder = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {ambientSounds.map((sound, index) => (
+                {ambientSounds.map((sound: AmbientSound, index: number) => (
                   <div key={sound.id} className="p-4 bg-muted/10 rounded-lg space-y-3">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium capitalize">{sound.type.replace('_', ' ')}</h4>
@@ -355,9 +355,9 @@ const AudioSceneBuilder = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {currentSoundTypes.map((type) => (
+                          {currentSoundTypes.map((type: string) => (
                             <SelectItem key={type} value={type}>
-                              {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              {type.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -372,7 +372,7 @@ const AudioSceneBuilder = () => {
                       </div>
                       <Slider
                         value={[sound.volume]}
-                        onValueChange={([value]) => updateAmbientSound(sound.id, { volume: value })}
+                        onValueChange={([value]: number[]) => updateAmbientSound(sound.id, { volume: value })}
                         min={0}
                         max={1}
                         step={0.05}
@@ -466,7 +466,7 @@ const AudioSceneBuilder = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {environmentEffects.map((effect) => (
+                {environmentEffects.map((effect: EnvironmentEffect) => (
                   <div key={effect.id} className="p-4 bg-muted/10 rounded-lg space-y-3">
                     <div className="flex items-center justify-between">
                       <Input
@@ -525,7 +525,7 @@ const AudioSceneBuilder = () => {
                       </div>
                       <Slider
                         value={[effect.intensity]}
-                        onValueChange={([value]) => updateEnvironmentEffect(effect.id, { intensity: value })}
+                        onValueChange={([value]: number[]) => updateEnvironmentEffect(effect.id, { intensity: value })}
                         min={0}
                         max={1}
                         step={0.05}

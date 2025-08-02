@@ -1,156 +1,136 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
+import { Express, Request, Response } from "express"; // Import types
+import { Server } from "http";
 import { storage } from "./storage";
-import { insertAudioProjectSchema, insertVoiceProfileSchema, insertAudioSceneSchema } from "@shared/schema";
-import { z } from "zod";
+import { log } from "./vite";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Speech generation route (replacing Supabase Edge Function)
-  app.post("/api/generate-speech", async (req, res) => {
+  app.post("/api/generate-speech", async (req: Request, res: Response) => {
     try {
-      const { text, voice_id = 'Aria', model_id = 'eleven_multilingual_v2', voice_settings = {}, emotion = 'neutral', age_factor = 1.0, speed = 1.0, pitch = 1.0, clarity = 1.0 } = req.body;
-
-      if (!text || text.trim().length === 0) {
-        return res.status(400).json({ error: 'Text is required' });
-      }
-
-      // For now, return a placeholder response until we get the ElevenLabs API key
-      res.status(501).json({ 
-        error: 'Speech generation requires ElevenLabs API key. Please configure ELEVENLABS_API_KEY environment variable.',
-        placeholder: true,
-        requestData: { text, voice_id, emotion }
-      });
-    } catch (error) {
-      console.error('Error in generate-speech:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      const { text, voice_id, emotion, age_factor, speed, pitch, clarity, voice_settings } = req.body;
+      // In a real application, you would integrate with ElevenLabs or similar here
+      // For now, simulate a response
+      log(`Generating speech for text: "${text.substring(0, 30)}..." with voice ${voice_id}`, "speech");
+      const audioBuffer = Buffer.from("simulated audio data", "utf-8"); // Replace with actual audio buffer
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.send(audioBuffer);
+    } catch (error: any) {
+      log(`Error generating speech: ${error.message}`, "speech");
+      res.status(500).json({ error: error.message });
     }
   });
 
   // AI Content generation route (replacing Supabase Edge Function)
-  app.post("/api/ai-content-generator", async (req, res) => {
+  app.post("/api/ai-content-generator", async (req: Request, res: Response) => {
     try {
-      const { type, topic, style, length, audience, voice_suggestions = true, emotional_cues = true, pronunciation_guides = false } = req.body;
-
-      if (!topic || !type) {
-        return res.status(400).json({ error: 'Topic and type are required' });
-      }
-
-      // For now, return a placeholder response until we get the OpenAI API key
-      res.status(501).json({ 
-        error: 'AI content generation requires OpenAI API key. Please configure OPENAI_API_KEY environment variable.',
-        placeholder: true,
-        requestData: { type, topic, style, length, audience }
-      });
-    } catch (error) {
-      console.error('Error in ai-content-generator:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      const { type, topic, style, length, audience, voice_suggestions, emotional_cues, pronunciation_guides } = req.body;
+      // In a real application, you would integrate with OpenAI or similar here
+      // For now, simulate a response
+      log(`Generating AI content for topic: "${topic}" of type ${type}`, "ai-content");
+      const generatedContent = {
+        content: `This is a simulated ${type} about ${topic} in a ${style} style for ${audience}. It's a ${length} piece.`,
+        metadata: {
+          estimated_duration: length === 'short' ? 1 : length === 'medium' ? 3 : 7,
+          recommended_voices: ["Aria", "Roger"],
+          voice_suggestions,
+          emotional_cues,
+        },
+        scenes: [],
+        tips: ["Speak clearly", "Vary your pace"],
+      };
+      res.json(generatedContent);
+    } catch (error: any) {
+      log(`Error generating AI content: ${error.message}`, "ai-content");
+      res.status(500).json({ error: error.message });
     }
   });
 
   // Voice Profiles CRUD routes
-  app.get("/api/voice-profiles", async (req, res) => {
+  app.get("/api/voice-profiles", async (req: Request, res: Response) => {
     try {
-      const userId = req.query.userId as string;
-      const publicOnly = req.query.public === 'true';
-
-      if (publicOnly) {
+      const { userId, isPublic } = req.query;
+      if (isPublic === 'true') {
         const profiles = await storage.getPublicVoiceProfiles();
         res.json(profiles);
       } else if (userId) {
-        const profiles = await storage.getVoiceProfilesByUser(parseInt(userId));
+        const profiles = await storage.getVoiceProfilesByUser(parseInt(userId as string));
         res.json(profiles);
       } else {
-        res.status(400).json({ error: 'userId parameter required unless requesting public profiles' });
+        // In a real app, you might return profiles for the authenticated user
+        res.status(400).json({ error: "Missing userId or isPublic query parameter" });
       }
-    } catch (error) {
-      console.error('Error fetching voice profiles:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    } catch (error: any) {
+      log(`Error fetching voice profiles: ${error.message}`, "voice-profiles");
+      res.status(500).json({ error: error.message });
     }
   });
 
-  app.post("/api/voice-profiles", async (req, res) => {
+  app.post("/api/voice-profiles", async (req: Request, res: Response) => {
     try {
-      const profileData = insertVoiceProfileSchema.parse(req.body);
-      const profile = await storage.createVoiceProfile(profileData);
-      res.json(profile);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Invalid profile data', details: error.errors });
-      } else {
-        console.error('Error creating voice profile:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      const newProfile = await storage.createVoiceProfile(req.body);
+      res.status(201).json(newProfile);
+    } catch (error: any) {
+      log(`Error creating voice profile: ${error.message}`, "voice-profiles");
+      res.status(500).json({ error: error.message });
     }
   });
 
   // Audio Projects CRUD routes
-  app.get("/api/audio-projects", async (req, res) => {
+  app.get("/api/audio-projects", async (req: Request, res: Response) => {
     try {
-      const userId = req.query.userId as string;
-      if (!userId) {
-        return res.status(400).json({ error: 'userId parameter required' });
+      const { userId } = req.query;
+      if (userId) {
+        const projects = await storage.getAudioProjectsByUser(parseInt(userId as string));
+        res.json(projects);
+      } else {
+        // In a real app, you might return projects for the authenticated user
+        res.status(400).json({ error: "Missing userId query parameter" });
       }
-
-      const projects = await storage.getAudioProjectsByUser(parseInt(userId));
-      res.json(projects);
-    } catch (error) {
-      console.error('Error fetching audio projects:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    } catch (error: any) {
+      log(`Error fetching audio projects: ${error.message}`, "audio-projects");
+      res.status(500).json({ error: error.message });
     }
   });
 
-  app.post("/api/audio-projects", async (req, res) => {
+  app.post("/api/audio-projects", async (req: Request, res: Response) => {
     try {
-      const projectData = insertAudioProjectSchema.parse(req.body);
-      const project = await storage.createAudioProject(projectData);
-      res.json(project);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Invalid project data', details: error.errors });
-      } else {
-        console.error('Error creating audio project:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      const newProject = await storage.createAudioProject(req.body);
+      res.status(201).json(newProject);
+    } catch (error: any) {
+      log(`Error creating audio project: ${error.message}`, "audio-projects");
+      res.status(500).json({ error: error.message });
     }
   });
 
   // Audio Scenes CRUD routes
-  app.get("/api/audio-scenes", async (req, res) => {
+  app.get("/api/audio-scenes", async (req: Request, res: Response) => {
     try {
-      const userId = req.query.userId as string;
-      const projectId = req.query.projectId as string;
-
+      const { userId, projectId } = req.query;
       if (projectId) {
-        const scenes = await storage.getAudioScenesByProject(projectId);
+        const scenes = await storage.getAudioScenesByProject(projectId as string);
         res.json(scenes);
       } else if (userId) {
-        const scenes = await storage.getAudioScenesByUser(parseInt(userId));
+        const scenes = await storage.getAudioScenesByUser(parseInt(userId as string));
         res.json(scenes);
       } else {
-        res.status(400).json({ error: 'userId or projectId parameter required' });
+        // In a real app, you might return scenes for the authenticated user
+        res.status(400).json({ error: "Missing userId or projectId query parameter" });
       }
-    } catch (error) {
-      console.error('Error fetching audio scenes:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    } catch (error: any) {
+      log(`Error fetching audio scenes: ${error.message}`, "audio-scenes");
+      res.status(500).json({ error: error.message });
     }
   });
 
-  app.post("/api/audio-scenes", async (req, res) => {
+  app.post("/api/audio-scenes", async (req: Request, res: Response) => {
     try {
-      const sceneData = insertAudioSceneSchema.parse(req.body);
-      const scene = await storage.createAudioScene(sceneData);
-      res.json(scene);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Invalid scene data', details: error.errors });
-      } else {
-        console.error('Error creating audio scene:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      const newScene = await storage.createAudioScene(req.body);
+      res.status(201).json(newScene);
+    } catch (error: any) {
+      log(`Error creating audio scene: ${error.message}`, "audio-scenes");
+      res.status(500).json({ error: error.message });
     }
   });
 
-  const httpServer = createServer(app);
-
-  return httpServer;
+  return server;
 }

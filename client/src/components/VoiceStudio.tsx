@@ -17,9 +17,9 @@ const VoiceStudio = () => {
   const [age, setAge] = useState("adult");
   const [accent, setAccent] = useState("american");
   const [voice, setVoice] = useState("Aria");
-  const [speed, setSpeed] = useState([1]);
-  const [pitch, setPitch] = useState([1]);
-  const [clarity, setClarity] = useState([0.8]);
+  const [speed, setSpeed] = useState<number[]>([1]);
+  const [pitch, setPitch] = useState<number[]>([1]);
+  const [clarity, setClarity] = useState<number[]>([0.8]);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -109,7 +109,7 @@ const VoiceStudio = () => {
       }
 
       // Create blob URL for audio playback
-      const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+      const audioBlob = new Blob([response.data as BlobPart], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       setCurrentAudioUrl(audioUrl);
 
@@ -144,7 +144,7 @@ const VoiceStudio = () => {
         description: "Speech generated successfully!",
       });
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Speech generation error:', error);
       toast({
         title: "Error",
@@ -258,7 +258,7 @@ const VoiceStudio = () => {
                 <h3 className="text-lg font-semibold">Audio Visualization</h3>
                 <div className="h-40 bg-muted/20 rounded-lg p-4 relative overflow-hidden">
                   <div className="flex items-end justify-center h-full gap-1">
-                    {[...Array(60)].map((_, i) => (
+                    {Array.from({ length: 60 }).map((_, i) => (
                       <div
                         key={i}
                         className={`rounded-full transition-all duration-300 ${

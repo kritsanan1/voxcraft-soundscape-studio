@@ -152,8 +152,8 @@ const SpatialAudio2D = ({ sourcePosition, isPlaying, onPositionChange }: {
 const SpatialAudio = () => {
   const [sourcePosition, setSourcePosition] = useState<[number, number, number]>([2, 1, 0]);
   const [environment, setEnvironment] = useState("room");
-  const [distance, setDistance] = useState([3]);
-  const [reverb, setReverb] = useState([0.5]);
+  const [distance, setDistance] = useState<number[]>([3]);
+  const [reverb, setReverb] = useState<number[]>([0.5]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [webGLAvailable, setWebGLAvailable] = useState(true);
 
@@ -317,7 +317,7 @@ const SpatialAudio = () => {
                     </div>
                     <Slider
                       value={[sourcePosition[0]]}
-                      onValueChange={(value) => setSourcePosition([value[0], sourcePosition[1], sourcePosition[2]])}
+                      onValueChange={([value]: number[]) => setSourcePosition([value, sourcePosition[1], sourcePosition[2]])}
                       min={-5}
                       max={5}
                       step={0.5}
@@ -332,7 +332,7 @@ const SpatialAudio = () => {
                     </div>
                     <Slider
                       value={[sourcePosition[1]]}
-                      onValueChange={(value) => setSourcePosition([sourcePosition[0], value[0], sourcePosition[2]])}
+                      onValueChange={([value]: number[]) => setSourcePosition([sourcePosition[0], value, sourcePosition[2]])}
                       min={-2}
                       max={4}
                       step={0.5}
@@ -347,7 +347,7 @@ const SpatialAudio = () => {
                     </div>
                     <Slider
                       value={[sourcePosition[2]]}
-                      onValueChange={(value) => setSourcePosition([sourcePosition[0], sourcePosition[1], value[0]])}
+                      onValueChange={([value]: number[]) => setSourcePosition([sourcePosition[0], sourcePosition[1], value])}
                       min={-5}
                       max={5}
                       step={0.5}

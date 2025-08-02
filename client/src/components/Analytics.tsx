@@ -69,11 +69,11 @@ const Analytics = () => {
 
       // Process analytics data
       const totalProjects = projects?.length || 0;
-      const totalGenerations = projects?.filter(p => p.audio_url).length || 0;
+      const totalGenerations = projects?.filter((p: { audio_url?: string }) => p.audio_url).length || 0;
       
       // Calculate popular voices from audio_settings
       const voiceUsage: { [key: string]: number } = {};
-      projects?.forEach(project => {
+      projects?.forEach((project: { audio_settings?: { voice_id?: string } }) => {
         if (project.audio_settings?.voice_id) {
           voiceUsage[project.audio_settings.voice_id] = (voiceUsage[project.audio_settings.voice_id] || 0) + 1;
         }
@@ -86,7 +86,7 @@ const Analytics = () => {
 
       // Calculate recent activity (daily counts)
       const activityByDate: { [key: string]: number } = {};
-      projects?.forEach(project => {
+      projects?.forEach((project: { created_at: string }) => {
         const date = new Date(project.created_at).toISOString().split('T')[0];
         activityByDate[date] = (activityByDate[date] || 0) + 1;
       });
@@ -98,16 +98,16 @@ const Analytics = () => {
 
       // Calculate usage by content type (estimate based on content length)
       const usageByType = [
-        { type: "Short Content", count: projects?.filter(p => p.content.length < 200).length || 0 },
-        { type: "Medium Content", count: projects?.filter(p => p.content.length >= 200 && p.content.length < 500).length || 0 },
-        { type: "Long Content", count: projects?.filter(p => p.content.length >= 500).length || 0 }
+        { type: "Short Content", count: projects?.filter((p: { content: string }) => p.content.length < 200).length || 0 },
+        { type: "Medium Content", count: projects?.filter((p: { content: string }) => p.content.length >= 200 && p.content.length < 500).length || 0 },
+        { type: "Long Content", count: projects?.filter((p: { content: string }) => p.content.length >= 500).length || 0 }
       ];
 
       setAnalyticsData({
         totalProjects,
         totalGenerations,
         totalDuration: totalGenerations * 2.5, // Estimate
-        averageLength: totalProjects > 0 ? projects.reduce((sum, p) => sum + p.content.length, 0) / totalProjects : 0,
+        averageLength: totalProjects > 0 ? projects.reduce((sum: number, p: { content: string }) => sum + p.content.length, 0) / totalProjects : 0,
         popularVoices,
         recentActivity,
         usageByType

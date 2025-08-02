@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Activity, Zap, Clock, Wifi, AlertCircle, 
   CheckCircle, RefreshCw, Download 
@@ -64,8 +65,8 @@ const PerformanceMonitor = () => {
       const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
       
       // Estimate connection speed (rough approximation)
-      const connectionSpeed = navigator.connection ? 
-        (navigator.connection as any).downlink || 0 : 0;
+      const connection = (navigator as any).connection || {};
+      const connectionSpeed = connection.downlink || 0;
 
       // Calculate latency (rough approximation)
       const latency = navigation ? navigation.responseStart - navigation.requestStart : 0;
@@ -167,6 +168,18 @@ const PerformanceMonitor = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
+
+  if (loading) {
+    return (
+      <section className="py-20 px-6">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center">
+            <div className="animate-pulse">Loading analytics...</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 px-6">
@@ -319,7 +332,7 @@ const PerformanceMonitor = () => {
                   <CheckCircle className="h-6 w-6 text-primary" />
                 </div>
               </div>
-            </Card>
+            </CardContent>
           </Card>
         </div>
 
@@ -346,10 +359,10 @@ const PerformanceMonitor = () => {
               <div className="space-y-2">
                 <h4 className="font-medium">Performance Timing</h4>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p>Connection Type: {(navigator.connection as any)?.effectiveType || 'Unknown'}</p>
-                  <p>Downlink: {(navigator.connection as any)?.downlink || 'Unknown'} Mbps</p>
-                  <p>RTT: {(navigator.connection as any)?.rtt || 'Unknown'} ms</p>
-                  <p>Save Data: {(navigator.connection as any)?.saveData ? 'Enabled' : 'Disabled'}</p>
+                  <p>Connection Type: {((navigator as any).connection)?.effectiveType || 'Unknown'}</p>
+                  <p>Downlink: {((navigator as any).connection)?.downlink || 'Unknown'} Mbps</p>
+                  <p>RTT: {((navigator as any).connection)?.rtt || 'Unknown'} ms</p>
+                  <p>Save Data: {((navigator as any).connection)?.saveData ? 'Enabled' : 'Disabled'}</p>
                 </div>
               </div>
             </div>

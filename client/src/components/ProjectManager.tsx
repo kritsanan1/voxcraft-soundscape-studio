@@ -14,7 +14,7 @@ interface AudioProject {
   id: string;
   title: string;
   content: string;
-  audio_url?: string;
+  audio_url?: string | null; // Changed to allow null
   audio_settings: any;
   voice_profile_id?: string;
   created_at: string;
@@ -43,7 +43,7 @@ const ProjectManager = () => {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setProjects(data || []);
+      setProjects(data as AudioProject[] || []);
     } catch (error) {
       console.error('Error loading projects:', error);
       toast({
@@ -90,7 +90,7 @@ const ProjectManager = () => {
 
       if (error) throw error;
 
-      setProjects([data, ...projects]);
+      setProjects([data as AudioProject, ...projects]);
       setNewProjectTitle("");
       
       toast({
@@ -232,7 +232,7 @@ const ProjectManager = () => {
                 value={newProjectTitle}
                 onChange={(e) => setNewProjectTitle(e.target.value)}
                 className="bg-muted/30 border-border/50"
-                onKeyPress={(e) => e.key === 'Enter' && createProject()}
+                onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && createProject()}
               />
               <Button 
                 onClick={createProject}
