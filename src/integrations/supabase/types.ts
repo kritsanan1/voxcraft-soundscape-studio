@@ -67,6 +67,91 @@ export type Database = {
           },
         ]
       }
+      audio_projects: {
+        Row: {
+          audio_settings: Json | null
+          audio_url: string | null
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+          voice_profile_id: string | null
+        }
+        Insert: {
+          audio_settings?: Json | null
+          audio_url?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          voice_profile_id?: string | null
+        }
+        Update: {
+          audio_settings?: Json | null
+          audio_url?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          voice_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_projects_voice_profile_id_fkey"
+            columns: ["voice_profile_id"]
+            isOneToOne: false
+            referencedRelation: "voice_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_scenes: {
+        Row: {
+          ambient_sounds: Json | null
+          created_at: string
+          id: string
+          project_id: string | null
+          scene_name: string
+          spatial_config: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ambient_sounds?: Json | null
+          created_at?: string
+          id?: string
+          project_id?: string | null
+          scene_name: string
+          spatial_config?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ambient_sounds?: Json | null
+          created_at?: string
+          id?: string
+          project_id?: string | null
+          scene_name?: string
+          spatial_config?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_scenes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "audio_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           created_at: string | null
@@ -1119,6 +1204,45 @@ export type Database = {
           profile_image_url?: string | null
           updated_at?: string | null
           user_type?: string
+        }
+        Relationships: []
+      }
+      voice_profiles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_custom: boolean | null
+          is_public: boolean | null
+          name: string
+          updated_at: string
+          user_id: string
+          voice_id: string
+          voice_settings: Json | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_custom?: boolean | null
+          is_public?: boolean | null
+          name: string
+          updated_at?: string
+          user_id: string
+          voice_id: string
+          voice_settings?: Json | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_custom?: boolean | null
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+          voice_id?: string
+          voice_settings?: Json | null
         }
         Relationships: []
       }

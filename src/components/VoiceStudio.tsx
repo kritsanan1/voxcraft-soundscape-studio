@@ -1,21 +1,29 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Play, Pause, Download, Settings2, Mic } from "lucide-react";
+import { Play, Pause, Download, Settings2, Mic, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const VoiceStudio = () => {
   const [text, setText] = useState("Welcome to VoxCraft - the future of voice processing.");
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [emotion, setEmotion] = useState("neutral");
   const [age, setAge] = useState("adult");
   const [accent, setAccent] = useState("american");
+  const [voice, setVoice] = useState("Aria");
   const [speed, setSpeed] = useState([1]);
   const [pitch, setPitch] = useState([1]);
   const [clarity, setClarity] = useState([0.8]);
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
+  
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   const emotions = [
     { value: "neutral", label: "Neutral", emoji: "😐" },
@@ -42,9 +50,146 @@ const VoiceStudio = () => {
     { value: "canadian", label: "Canadian English" }
   ];
 
+  const voices = [
+    { value: "Aria", label: "Aria (Female)" },
+    { value: "Roger", label: "Roger (Male)" },
+    { value: "Sarah", label: "Sarah (Female)" },
+    { value: "Laura", label: "Laura (Female)" },
+    { value: "Charlie", label: "Charlie (Male)" },
+    { value: "George", label: "George (Male)" },
+    { value: "Callum", label: "Callum (Male)" },
+    { value: "River", label: "River (Neutral)" },
+    { value: "Liam", label: "Liam (Male)" },
+    { value: "Charlotte", label: "Charlotte (Female)" }
+  ];
+
+  const generateSpeech = async () => {
+    if (!text.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter some text to generate speech.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to use the voice generation feature.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const response = await supabase.functions.invoke('generate-speech', {
+        body: {
+          text,
+          voice_id: voice,
+          emotion,
+          age_factor: age === 'child' ? 0.7 : age === 'teen' ? 0.8 : age === 'adult' ? 1.0 : 1.2,
+          speed: speed[0],
+          pitch: pitch[0],
+          clarity: clarity[0],
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: clarity[0],
+            style: emotion === 'dramatic' ? 0.3 : 0.0,
+            use_speaker_boost: true
+          }
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      // Create blob URL for audio playback
+      const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      setCurrentAudioUrl(audioUrl);
+
+      // Create and play audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      audio.onloadeddata = () => {
+        audio.play();
+        setIsPlaying(true);
+      };
+      
+      audio.onended = () => {
+        setIsPlaying(false);
+      };
+      
+      audio.onerror = () => {
+        toast({
+          title: "Playback Error",
+          description: "Failed to play the generated audio.",
+          variant: "destructive",
+        });
+        setIsPlaying(false);
+      };
+
+      toast({
+        title: "Success",
+        description: "Speech generated successfully!",
+      });
+
+    } catch (error) {
+      console.error('Speech generation error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to generate speech. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-    // TODO: Implement actual TTS playback
+    if (currentAudioUrl && audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } else {
+      generateSpeech();
+    }
+  };
+
+  const handleDownload = () => {
+    if (currentAudioUrl) {
+      const link = document.createElement('a');
+      link.href = currentAudioUrl;
+      link.download = `voxcraft-speech-${Date.now()}.mp3`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Downloaded",
+        description: "Audio file has been downloaded successfully!",
+      });
+    } else {
+      toast({
+        title: "No Audio",
+        description: "Generate speech first before downloading.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -82,16 +227,24 @@ const VoiceStudio = () => {
                 <div className="flex gap-3">
                   <Button 
                     onClick={handlePlayPause}
+                    disabled={isGenerating}
                     className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
                   >
-                    {isPlaying ? (
+                    {isGenerating ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : isPlaying ? (
                       <Pause className="w-4 h-4 mr-2" />
                     ) : (
                       <Play className="w-4 h-4 mr-2" />
                     )}
-                    {isPlaying ? "Pause" : "Generate & Play"}
+                    {isGenerating ? "Generating..." : isPlaying ? "Pause" : "Generate & Play"}
                   </Button>
-                  <Button variant="outline" className="border-glass-border bg-glass-bg backdrop-blur-sm">
+                  <Button 
+                    variant="outline" 
+                    className="border-glass-border bg-glass-bg backdrop-blur-sm"
+                    onClick={handleDownload}
+                    disabled={!currentAudioUrl}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>
@@ -134,6 +287,23 @@ const VoiceStudio = () => {
                 <div className="flex items-center gap-2">
                   <Settings2 className="w-5 h-5 text-primary" />
                   <h3 className="text-lg font-semibold">Voice Settings</h3>
+                </div>
+
+                {/* Voice Selection */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium">Voice</label>
+                  <Select value={voice} onValueChange={setVoice}>
+                    <SelectTrigger className="bg-muted/30 border-border/50">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {voices.map((voiceOption) => (
+                        <SelectItem key={voiceOption.value} value={voiceOption.value}>
+                          {voiceOption.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Emotion Control */}
