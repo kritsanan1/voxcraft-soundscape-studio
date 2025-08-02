@@ -1,13 +1,11 @@
 import { useState, useRef, Suspense, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Sphere, Text } from "@react-three/drei";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Volume2, RotateCcw, Play, Settings, AlertTriangle } from "lucide-react";
-import * as THREE from "three";
+// import * as THREE from "three";
 
 // WebGL detection utility
 const isWebGLAvailable = () => {
@@ -20,43 +18,23 @@ const isWebGLAvailable = () => {
   }
 };
 
-// Animated Audio Source in 3D space
+// Placeholder for 3D Audio Source - will be restored after Three.js migration
 const AudioSource = ({ position, isActive }: { position: [number, number, number], isActive: boolean }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current && isActive) {
-      meshRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 3) * 0.1);
-    }
-  });
-
   return (
-    <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[0.2]} />
-      <meshStandardMaterial 
-        color={isActive ? "#ef4444" : "#64748b"} 
-        emissive={isActive ? "#ef4444" : "#000000"}
-        emissiveIntensity={isActive ? 0.3 : 0}
-      />
-    </mesh>
+    <div className="w-4 h-4 rounded-full" style={{
+      backgroundColor: isActive ? "#ef4444" : "#64748b",
+      transform: `translate(${position[0] * 10}px, ${position[1] * 10}px)`
+    }} />
   );
 };
 
-// Listener representation
+// Placeholder components for Three.js migration
 const Listener = () => {
-  return (
-    <mesh position={[0, 0, 0]}>
-      <sphereGeometry args={[0.15]} />
-      <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={0.2} />
-    </mesh>
-  );
+  return <div className="w-3 h-3 rounded-full bg-blue-500" />;
 };
 
-// Grid Component
 const Grid = () => {
-  return (
-    <gridHelper args={[10, 10, "#64748b", "#374151"]} position={[0, -2, 0]} />
-  );
+  return <div className="grid grid-cols-10 gap-1 opacity-30" />;
 };
 
 // 2D Fallback Component for when WebGL is not available
@@ -239,47 +217,17 @@ const SpatialAudio = () => {
                 </div>
                 
                 <div className="h-96 bg-muted/10 rounded-lg overflow-hidden relative">
-                  {webGLAvailable ? (
-                    <Suspense fallback={
-                      <div className="flex items-center justify-center h-full">
-                        <div className="text-center">
-                          <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                          <div className="text-sm text-muted-foreground">Loading 3D View...</div>
-                        </div>
-                      </div>
-                    }>
-                      <Canvas 
-                        camera={{ position: [5, 3, 5], fov: 60 }}
-                        onCreated={() => console.log('WebGL Canvas created successfully')}
-                        onError={(error) => {
-                          console.error('Canvas error:', error);
-                          setWebGLAvailable(false);
-                        }}
-                      >
-                        <ambientLight intensity={0.2} />
-                        <pointLight position={[10, 10, 10]} intensity={1} />
-                        <pointLight position={[-10, -10, -10]} intensity={0.5} color="#ef4444" />
-                        
-                        <AudioSource position={sourcePosition} isActive={isPlaying} />
-                        <Listener />
-                        <Grid />
-                        
-                        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
-                      </Canvas>
-                    </Suspense>
-                  ) : (
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 mb-4 text-amber-500">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span className="text-sm">3D view unavailable - showing 2D fallback</span>
-                      </div>
-                      <SpatialAudio2D 
-                        sourcePosition={sourcePosition}
-                        isPlaying={isPlaying}
-                        onPositionChange={setSourcePosition}
-                      />
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-4 text-amber-500">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span className="text-sm">3D view temporarily disabled during migration - using 2D fallback</span>
                     </div>
-                  )}
+                    <SpatialAudio2D 
+                      sourcePosition={sourcePosition}
+                      isPlaying={isPlaying}
+                      onPositionChange={setSourcePosition}
+                    />
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4 text-sm">
