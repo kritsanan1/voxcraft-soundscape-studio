@@ -31,44 +31,31 @@ const AudioSource = ({ position, isActive }: { position: [number, number, number
   });
 
   return (
-    <group position={position}>
-      <Sphere ref={meshRef} args={[0.2]} position={[0, 0, 0]}>
-        <meshStandardMaterial 
-          color={isActive ? "#ef4444" : "#64748b"} 
-          emissive={isActive ? "#ef4444" : "#000000"}
-          emissiveIntensity={isActive ? 0.3 : 0}
-        />
-      </Sphere>
-      <Text
-        position={[0, 0.5, 0]}
-        fontSize={0.2}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        Voice
-      </Text>
-    </group>
+    <mesh ref={meshRef} position={position}>
+      <sphereGeometry args={[0.2]} />
+      <meshStandardMaterial 
+        color={isActive ? "#ef4444" : "#64748b"} 
+        emissive={isActive ? "#ef4444" : "#000000"}
+        emissiveIntensity={isActive ? 0.3 : 0}
+      />
+    </mesh>
   );
 };
 
 // Listener representation
 const Listener = () => {
   return (
-    <group position={[0, 0, 0]}>
-      <Sphere args={[0.15]}>
-        <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={0.2} />
-      </Sphere>
-      <Text
-        position={[0, -0.4, 0]}
-        fontSize={0.15}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        Listener
-      </Text>
-    </group>
+    <mesh position={[0, 0, 0]}>
+      <sphereGeometry args={[0.15]} />
+      <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={0.2} />
+    </mesh>
+  );
+};
+
+// Grid Component
+const Grid = () => {
+  return (
+    <gridHelper args={[10, 10, "#64748b", "#374151"]} position={[0, -2, 0]} />
   );
 };
 
@@ -275,9 +262,7 @@ const SpatialAudio = () => {
                         
                         <AudioSource position={sourcePosition} isActive={isPlaying} />
                         <Listener />
-                        
-                        {/* Grid floor */}
-                        <gridHelper args={[10, 10, "#64748b", "#374151"]} position={[0, -2, 0]} />
+                        <Grid />
                         
                         <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
                       </Canvas>
