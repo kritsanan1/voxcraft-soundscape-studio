@@ -1,34 +1,22 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(async ({ command }) => {
-  const serverOptions = {
-    middlewareMode: true,
-    hmr: {
-      server: undefined, // This will be set by the Express server
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: "::",
+    port: 8080,
+  },
+  plugins: [
+    react(),
+    mode === 'development' &&
+    componentTagger(),
+  ].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-    allowedHosts: ['*'], // Changed to array of strings
-  };
-
-  return {
-    plugins: [
-      react(),
-      ...(command === "serve"
-        ? [
-            await import("@replit/vite-plugin-cartographer").then((m) =>
-              m.cartographer(),
-            ),
-          ]
-        : []),
-    ],
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./client/src"),
-      },
-    },
-    server: serverOptions,
-    appType: "custom",
-  };
-});
+  },
+}));
