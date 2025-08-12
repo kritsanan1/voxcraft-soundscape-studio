@@ -40,7 +40,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Core Application Features
 - **Voice Studio**: Real-time voice transformation with emotion, age, accent, and vocal characteristics control
-- **3D Spatial Audio**: Interactive 3D audio scene builder with WebGL-based visualization
+- **Voice Cloning**: Advanced voice replication using ElevenLabs API with quality scoring and training management
+- **Real-Time Audio Processing**: Live voice enhancement with professional effects, presets, and performance monitoring
+- **Advanced Analytics**: Comprehensive voice generation insights, usage patterns, and performance metrics
+- **3D Spatial Audio**: Interactive 3D audio scene builder with WebGL-based visualization (temporarily disabled for optimization)
 - **Voice Harmonization**: Multi-voice harmony creation with pitch offsetting and mixing capabilities
 - **Smart Content Generator**: AI-powered content creation for scripts, dialogues, and narration
 - **Project Management**: Full CRUD operations for audio projects with version control

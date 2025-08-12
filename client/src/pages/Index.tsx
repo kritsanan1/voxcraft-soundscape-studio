@@ -1,6 +1,9 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import VoiceStudio from "@/components/VoiceStudio";
+import VoiceCloning from "@/components/VoiceCloning";
+import AdvancedAnalytics from "@/components/AdvancedAnalytics";
+import RealTimeProcessor from "@/components/RealTimeProcessor";
 import VoiceHarmonization from "@/components/VoiceHarmonization";
 import AudioSceneBuilder from "@/components/AudioSceneBuilder";
 import SmartContentGenerator from "@/components/SmartContentGenerator";
@@ -14,9 +17,12 @@ const Index = () => {
       <Navigation />
       <Hero />
       <VoiceStudio />
+      <VoiceCloning />
+      <RealTimeProcessor />
       <VoiceHarmonization />
       <AudioSceneBuilder />
       <SmartContentGenerator />
+      <AdvancedAnalytics />
       {/* <SpatialAudio /> */}
       <Features />
       <Footer />

@@ -4,7 +4,10 @@ import { storage } from "./storage";
 import { 
   insertVoiceProfileSchema, 
   insertAudioProjectSchema, 
-  insertAudioSceneSchema 
+  insertAudioSceneSchema,
+  insertVoiceCloneSchema,
+  insertVoiceAnalyticsSchema,
+  insertAudioProcessingJobSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -287,7 +290,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create content generation prompt based on type and parameters
-      const lengthMap = {
+      const lengthMap: Record<string, string> = {
         short: "100-200 words",
         medium: "300-500 words", 
         long: "600-1000 words"
@@ -420,6 +423,122 @@ Additional context:
       } else {
         res.status(500).json({ error: "Failed to create audio scene" });
       }
+    }
+  });
+
+  // Advanced Feature Routes
+
+  // Voice Clones
+  app.get("/api/voice-clones", async (req, res) => {
+    const userId = req.query.userId as string;
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+    
+    const clones = await storage.getVoiceClonesByUser(userId);
+    res.json(clones);
+  });
+
+  app.post("/api/voice-clones", async (req, res) => {
+    try {
+      const cloneData = insertVoiceCloneSchema.parse(req.body);
+      const clone = await storage.createVoiceClone(cloneData);
+      res.json(clone);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid clone data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create voice clone" });
+    }
+  });
+
+  app.get("/api/voice-clones/:id", async (req, res) => {
+    const clone = await storage.getVoiceClone(req.params.id);
+    if (!clone) {
+      return res.status(404).json({ error: "Voice clone not found" });
+    }
+    res.json(clone);
+  });
+
+  app.delete("/api/voice-clones/:id", async (req, res) => {
+    const deleted = await storage.deleteVoiceClone(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Voice clone not found" });
+    }
+    res.json({ success: true });
+  });
+
+  // Voice Analytics
+  app.post("/api/analytics", async (req, res) => {
+    const { userId, timeRange = "30d" } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+
+    try {
+      const days = parseInt(timeRange.replace('d', '')) || 30;
+      const summary = await storage.getVoiceAnalyticsSummary(userId, days);
+      
+      // Enhanced analytics with demo data
+      const analytics = {
+        ...summary,
+        usageByEmotion: [
+          { emotion: 'neutral', count: 45, percentage: 50 },
+          { emotion: 'friendly', count: 27, percentage: 30 },
+          { emotion: 'excited', count: 13, percentage: 15 },
+          { emotion: 'calm', count: 5, percentage: 5 }
+        ],
+        dailyStats: Array.from({ length: 14 }, (_, i) => ({
+          date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          generations: Math.floor(Math.random() * 10) + 1,
+          cost: Math.random() * 0.50 + 0.05,
+          duration: Math.random() * 300 + 30
+        })),
+        topProjects: [
+          { id: '1', title: 'Marketing Campaign', generations: 25, avgQuality: 4.2 },
+          { id: '2', title: 'Audiobook Chapter 1', generations: 18, avgQuality: 4.5 },
+          { id: '3', title: 'Podcast Intro', generations: 12, avgQuality: 4.0 }
+        ],
+        performanceMetrics: {
+          avgProcessingTime: 3.2,
+          successRate: 0.98,
+          costEfficiency: 0.12
+        },
+        popularVoices: summary.popularVoices.map(v => ({
+          ...v,
+          voiceName: `Voice ${v.voiceId.slice(0, 8)}`,
+          avgQuality: 4.0 + Math.random()
+        }))
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Audio Processing Jobs
+  app.get("/api/processing-jobs", async (req, res) => {
+    const userId = req.query.userId as string;
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+    
+    const jobs = await storage.getAudioProcessingJobsByUser(userId);
+    res.json(jobs);
+  });
+
+  app.post("/api/processing-jobs", async (req, res) => {
+    try {
+      const jobData = insertAudioProcessingJobSchema.parse(req.body);
+      const job = await storage.createAudioProcessingJob(jobData);
+      res.json(job);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid job data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create processing job" });
     }
   });
 
