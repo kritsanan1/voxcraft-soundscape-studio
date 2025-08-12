@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Play, Pause, Download, Settings2, Mic, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { apiRequest } from "@/lib/queryClient";
 
 const VoiceStudio = () => {
   const [text, setText] = useState("Welcome to VoxCraft - the future of voice processing.");
@@ -76,18 +76,12 @@ const VoiceStudio = () => {
     setIsGenerating(true);
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to use the voice generation feature.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const response = await supabase.functions.invoke('generate-speech', {
-        body: {
+      const response = await fetch('/api/generate-speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           text,
           voice_id: voice,
           emotion,
@@ -100,16 +94,17 @@ const VoiceStudio = () => {
             similarity_boost: clarity[0],
             style: emotion === 'dramatic' ? 0.3 : 0.0,
             use_speaker_boost: true
-          }
-        }
+          },
+          userId: 'demo-user' // For demo purposes - in real app this would be from auth
+        })
       });
 
-      if (response.error) {
-        throw new Error(response.error.message);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       // Create blob URL for audio playback
-      const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+      const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       setCurrentAudioUrl(audioUrl);
 

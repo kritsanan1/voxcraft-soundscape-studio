@@ -4,7 +4,7 @@ import VoiceStudio from "@/components/VoiceStudio";
 import VoiceHarmonization from "@/components/VoiceHarmonization";
 import AudioSceneBuilder from "@/components/AudioSceneBuilder";
 import SmartContentGenerator from "@/components/SmartContentGenerator";
-import SpatialAudio from "@/components/SpatialAudio";
+// import SpatialAudio from "@/components/SpatialAudio";
 import Features from "@/components/Features";
 import Footer from "@/components/Footer";
 
@@ -17,7 +17,7 @@ const Index = () => {
       <VoiceHarmonization />
       <AudioSceneBuilder />
       <SmartContentGenerator />
-      <SpatialAudio />
+      {/* <SpatialAudio /> */}
       <Features />
       <Footer />
     </div>
